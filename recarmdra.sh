@@ -1,6 +1,10 @@
 #!/bin/bash
 
 # Adapted from a.sh by agzg.
+# TODO:
+# - Make this work with pacman as well.
+# - Allow easy configuration and addition of applications.
+# - Not all of these applications have their latest versions installed.
 
 echo "Recarmdra has been activated."
 
@@ -36,23 +40,60 @@ git config --global user.name mbyx
 git config --global user.email mbyx.dev@gmail.com
 
 echo "Installing compilers, editors, etc."
-# TODO: Check if this works.
-yes | curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+# Install Rust.
+curl https://sh.rustup.rs --proto '=https' --tlsv1.2 -sSf | sh -s -- -y
+source $HOME/.cargo/bin/
+
 wget -qO $HOME/Downloads/visualstudiocode-latest.deb https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64
 sudo apt install $HOME/Downloads/visualstudiocode-latest.deb -y
 
 # Install Python.
 echo "Installing and configuring Python"
 # Install pyenv to manage python.
-yes | curl https://pyenv.run | bash
-pyenv install latest
-pyenv global latest
+echo "Installing pyenv"
+curl https://pyenv.run | bash
+export PYENV_ROOT="$HOME/.pyenv"
+command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
+echo "Installing Python for real this time!"
+pyenv install 3:latest
 # Install Poetry.
-curl -sSL https://install.python-poetry.org | python3 -
+echo "Installing poetry"
+curl -sSL https://install.python-poetry.org | python3 - -n
 
+echo "Installing fish."
 sudo apt install fish -y
+echo "Installing Starship."
 sudo apt install starship -y
-# TODO: Install Anki, Obsidian, Stremio, and configure stuff to be on path and configure fish and starship
+
+# Install AppImageLauncher to manage Obsidian.
+echo "Installing AppImageLauncher"
+wget -qO $HOME/Downloads/appimagelauncher.deb https://github.com/TheAssassin/AppImageLauncher/releases/download/v2.2.0/appimagelauncher_2.2.0-travis995.0f91801.bionic_amd64.deb
+sudo apt install $HOME/Downloads/appimagelauncher.deb -y
+
+# Install Anki.
+echo "Installing Anki"
+sudo apt install anki -y
+
+# Install Obsidian.
+echo "Installing Obsidian"
+wget -qO $HOME/Downloads/obsidian-latest.AppImage https://github.com/obsidianmd/obsidian-releases/releases/download/v1.3.5/Obsidian-1.3.5.AppImage
+ail-cli integrate $HOME/Downloads/obsidian-latest.AppImage
+
+# Install Stremio.
+echo "Installing Stremio"
+wget -qO $HOME/Downloads/stremio-latest.deb https://dl.strem.io/shell-linux/v4.4.160/stremio_4.4.160-1_amd64.deb
+sudo apt install $HOME/Downloads/stremio-latest.deb -y
+
+# Install Ulauncher.
+echo "Installing Ulauncher"
+wget -qO $HOME/Downloads/ulauncher.deb https://github.com/Ulauncher/Ulauncher/releases/download/5.15.2/ulauncher_5.15.2_all.deb
+sudo apt install $HOME/Downloads/ulauncher.deb -y
+
+# Install bucklespring.
+echo "Installing bucklespring"
+sudo apt install bucklespring
 
 echo "Installing Sublime Text 4"
 wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | sudo apt-key add -
@@ -70,9 +111,13 @@ sudo apt install $HOME/Downloads/zoom.deb -y
 echo "Installing VLC Media Player..."
 sudo apt install vlc -y
 
+echo "Updating .bashrc."
+wget -qO https://raw.githubusercontent.com/mbyx/recarmdra/main/.bashrc >> $HOME/.bashrc
+
 sudo apt autoremove -y
 sudo apt autoclean
 echo "TODO (most likely):
 1. Set up GitHub PAT token.
 2. Sign in to Chrome.
-4. Set up Steam, install games."
+3. Set up Steam, install games.
+4. Add starship to fish path."
